@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meu Diário de Estudos</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #4f46e5;
+    --fire: #f97316;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1220;
+      --card: #1a1e33;
+      --text: #e8eaf6;
+      --muted: #9aa0b8;
+      --border: #2c3150;
+      --accent: #818cf8;
+      --fire: #fb923c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { margin: 0 0 4px; font-size: 1.7rem; }
+  h2 { margin: 0 0 14px; font-size: 1.15rem; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+
+  /* Ofensiva */
+  .streak { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .streak .fogo { font-size: 3rem; line-height: 1; }
+  .streak .num { font-size: 2.6rem; font-weight: 800; color: var(--fire); line-height: 1; }
+  .streak .info { color: var(--muted); font-size: .95rem; }
+  .streak .status { font-weight: 600; color: var(--text); }
+  .streak .recorde { margin-left: auto; text-align: right; }
+
+  /* Formulário */
+  .form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+  input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+  }
+  .full { grid-column: 1 / -1; }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+  }
+  button:hover { opacity: .9; }
+  button.mini {
+    padding: 5px 10px;
+    font-size: .8rem;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  button.mini:hover { color: var(--text); }
+
+  /* Totais */
+  .totais { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .total-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    border-left: 5px solid var(--cor);
+  }
+  .total-item .nome { font-size: .85rem; color: var(--muted); }
+  .total-item .valor { font-size: 1.3rem; font-weight: 700; }
+  .total-geral { margin-top: 14px; font-weight: 600; }
+
+  /* Histórico */
+  .registro {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .registro:last-child { border-bottom: none; }
+  .bolinha { width: 12px; height: 12px; border-radius: 50%; background: var(--cor); flex-shrink: 0; }
+  .registro .materia { font-weight: 600; }
+  .registro .data { color: var(--muted); font-size: .85rem; }
+  .registro .obs { color: var(--muted); font-size: .9rem; flex-basis: 100%; padding-left: 22px; }
+  .registro .tempo { margin-left: auto; font-weight: 600; }
+  .vazio { color: var(--muted); text-align: center; padding: 14px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>📚 Meu Diário de Estudos</h1>
+  <p class="sub">Registre suas horas e mantenha a ofensiva até o vestibular.</p>
+
+  <!-- OFENSIVA -->
+  <div class="card streak">
+    <div class="fogo" id="fogo">🔥</div>
+    <div>
+      <div class="num" id="streakNum">0</div>
+      <div class="info">dias seguidos de ofensiva</div>
+    </div>
+    <div class="info status" id="streakStatus"></div>
+    <div class="info recorde">
+      Maior ofensiva<br>
+      <strong id="melhorStreak">0</strong> dias
+    </div>
+  </div>
+
+  <!-- NOVO REGISTRO -->
+  <div class="card">
+    <h2>Novo registro</h2>
+    <div class="form">
+      <div>
+        <label for="materia">Matéria</label>
+        <select id="materia"></select>
+      </div>
+      <div>
+        <label for="data">Data</label>
+        <input type="date" id="data">
+      </div>
+      <div>
+        <label for="horas">Horas</label>
+        <input type="number" id="horas" min="0" max="24" value="1">
+      </div>
+      <div>
+        <label for="minutos">Minutos</label>
+        <input type="number" id="minutos" min="0" max="59" value="0">
+      </div>
+      <div class="full">
+        <label for="obs">O que você estudou? (opcional)</label>
+        <input type="text" id="obs" placeholder="Ex: Cinemática, lista de exercícios 3">
+      </div>
+      <div class="full">
+        <button onclick="adicionar()">Adicionar registro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOTAIS -->
+  <div class="card">
+    <h2>Total por matéria</h2>
+    <div class="totais" id="totais"></div>
+    <div class="total-geral" id="totalGeral"></div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="card">
+    <h2>Histórico</h2>
+    <div id="historico"></div>
+  </div>
+
+</div>
+
+<script>
+  // ====== CONFIGURAÇÃO ======
+  var MATERIAS = [
+    { nome: "Física",     cor: "#3b82f6" },
+    { nome: "Matemática", cor: "#ef4444" },
+    { nome: "Biologia",   cor: "#22c55e" },
+    { nome: "Química",    cor: "#a855f7" },
+    { nome: "História",   cor: "#f59e0b" },
+    { nome: "Geografia",  cor: "#14b8a6" }
+  ];
+  var CHAVE = "diario_estudos_v1";
+
+  // ====== DADOS (salvos no navegador) ======
+  function carregar() {
+    try {
+      var d = JSON.parse(localStorage.getItem(CHAVE));
+      if (d && d.registros && d.dias) return d;
+    } catch (e) {}
+    return { registros: [], dias: [] };
+  }
+  function salvar() {
+    try { localStorage.setItem(CHAVE, JSON.stringify(dados)); } catch (e) {
+      alert("Não consegui salvar. Verifique se o navegador permite armazenamento.");
+    }
+  }
+  var dados = carregar();
+
+  // ====== DATAS ======
+  function paraTexto(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function hoje() { return paraTexto(new Date()); }
+  function paraData(texto) {
+    var p = texto.split("-");
+    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  }
+  function diaAnterior(texto) {
+    var d = paraData(texto);
+    d.setDate(d.getDate() - 1);
+    return paraTexto(d);
+  }
+  function formatarData(texto) {
+    var p = texto.split("-");
+    return p[2] + "/" + p[1] + "/" + p[0];
+  }
+
+  // ====== OFENSIVA ======
+  // Um dia conta quando você adiciona, edita ou apaga algum registro nele.
+  function marcarHoje() {
+    var h = hoje();
+    if (dados.dias.indexOf(h) === -1) dados.dias.push(h);
+  }
+
+  function calcularOfensiva() {
+    var set = {};
+    dados.dias.forEach(function (d) { set[d] = true; });
+    var h = hoje();
+    var cursor;
+    if (set[h]) cursor = h;
+    else if (set[diaAnterior(h)]) cursor = diaAnterior(h);
+    else return 0;
+    var cont = 0;
+    while (set[cursor]) {
+      cont++;
+      cursor = diaAnterior(cursor);
+    }
+    return cont;
+  }
+
+  function calcularMelhor() {
+    var ordenados = dados.dias.slice().sort();
+    var melhor = 0, atual = 0, anterior = null;
+    ordenados.forEach(function (d) {
+      if (anterior !== null && diaAnterior(d) === anterior) atual++;
+      else atual = 1;
+      if (atual > melhor) melhor = atual;
+      anterior = d;
+    });
+    return melhor;
+  }
+
+  // ====== FORMATAÇÃO ======
+  function formatarTempo(min) {
+    var h = Math.floor(min / 60);
+    var m = min % 60;
+    if (h === 0) return m + "min";
+    if (m === 0) return h + "h";
+    return h + "h " + String(m).padStart(2, "0") + "min";
+  }
+  function corDa(nome) {
+    for (var i = 0; i < MATERIAS.length; i++) {
+      if (MATERIAS[i].nome === nome) return MATERIAS[i].cor;
+    }
+    return "#888";
+  }
+
+  // ====== AÇÕES ======
+  function adicionar() {
+    var materia = document.getElementById("materia").value;
+    var data = document.getElementById("data").value;
+    var horas = parseInt(document.getElementById("horas").value, 10) || 0;
+    var minutos = parseInt(document.getElementById("minutos").value, 10) || 0;
+    var obs = document.getElementById("obs").value.trim();
+    var total = horas * 60 + minutos;
+
+    if (!data) { alert("Escolha uma data."); return; }
+    if (total <= 0) { alert("Informe um tempo de estudo maior que zero."); return; }
+
+    dados.registros.push({
+      id: Date.now(),
+      materia: materia,
+      data: data,
+      minutos: total,
+      obs: obs
+    });
+    marcarHoje();
+    salvar();
+
+    document.getElementById("obs").value = "";
+    document.getElementById("horas").value = 1;
+    document.getElementById("minutos").value = 0;
+    desenhar();
+  }
+
+  function editar(id) {
+    var r = dados.registros.find(function (x) { return x.id === id; });
+    if (!r) return;
+    var resp = prompt("Novo tempo em minutos (atual: " + r.minutos + "):", r.minutos);
+    if (resp === null) return;
+    var novo = parseInt(resp, 10);
+    if (isNaN(novo) || novo <= 0) { alert("Digite um número de minutos válido."); return; }
+    r.minutos = novo;
+    marcarHoje();
+    salvar();
+    desenhar();
+  }
+
+  function apagar(id) {
+    if (!confirm("Apagar este registro?")) return;
+    dados.registros = dados.registros.filter(function (x) { return x.id !== id; });
+    marcarHoje();
+    salvar();
+    desenhar();
+  }
+
+  // ====== TELA ======
+  function desenhar() {
+    // Ofensiva
+    var streak = calcularOfensiva();
+    var ativoHoje = dados.dias.indexOf(hoje()) !== -1;
+    document.getElementById("streakNum").textContent = streak;
+    document.getElementById("melhorStreak").textContent = calcularMelhor();
+    document.getElementById("fogo").style.filter = streak > 0 ? "none" : "grayscale(1)";
+    var status = document.getElementById("streakStatus");
+    if (ativoHoje) status.textContent = "✅ Hoje já contou!";
+    else if (streak > 0) status.textContent = "⚠️ Registre algo hoje para não perder a ofensiva.";
+    else status.textContent = "Faça um registro hoje para começar.";
+
+    // Totais
+    var somas = {};
+    var geral = 0;
+    MATERIAS.forEach(function (m) { somas[m.nome] = 0; });
+    dados.registros.forEach(function (r) {
+      somas[r.materia] = (somas[r.materia] || 0) + r.minutos;
+      geral += r.minutos;
+    });
+    var totais = document.getElementById("totais");
+    totais.innerHTML = "";
+    MATERIAS.forEach(function (m) {
+      var div = document.createElement("div");
+      div.className = "total-item";
+      div.style.setProperty("--cor", m.cor);
+      var nome = document.createElement("div");
+      nome.className = "nome";
+      nome.textContent = m.nome;
+      var valor = document.createElement("div");
+      valor.className = "valor";
+      valor.textContent = formatarTempo(somas[m.nome]);
+      div.appendChild(nome);
+      div.appendChild(valor);
+      totais.appendChild(div);
+    });
+    document.getElementById("totalGeral").textContent = "Total geral: " + formatarTempo(geral);
+
+    // Histórico
+    var hist = document.getElementById("historico");
+    hist.innerHTML = "";
+    if (dados.registros.length === 0) {
+      var vazio = document.createElement("div");
+      vazio.className = "vazio";
+      vazio.textContent = "Nenhum registro ainda. Adicione o primeiro acima!";
+      hist.appendChild(vazio);
+      return;
+    }
+    var lista = dados.registros.slice().sort(function (a, b) {
+      if (a.data !== b.data) return a.data < b.data ? 1 : -1;
+      return b.id - a.id;
+    });
+    lista.forEach(function (r) {
+      var linha = document.createElement("div");
+      linha.className = "registro";
+      linha.style.setProperty("--cor", corDa(r.materia));
+
+      var bola = document.createElement("span");
+      bola.className = "bolinha";
+
+      var mat = document.createElement("span");
+      mat.className = "materia";
+      mat.textContent = r.materia;
+
+      var dt = document.createElement("span");
+      dt.className = "data";
+      dt.textContent = formatarData(r.data);
+
+      var tempo = document.createElement("span");
+      tempo.className = "tempo";
+      tempo.textContent = formatarTempo(r.minutos);
+
+      var bEd = document.createElement("button");
+      bEd.className = "mini";
+      bEd.textContent = "Editar";
+      bEd.onclick = function () { editar(r.id); };
+
+      var bDel = document.createElement("button");
+      bDel.className = "mini";
+      bDel.textContent = "Apagar";
+      bDel.onclick = function () { apagar(r.id); };
+
+      linha.appendChild(bola);
+      linha.appendChild(mat);
+      linha.appendChild(dt);
+      linha.appendChild(tempo);
+      linha.appendChild(bEd);
+      linha.appendChild(bDel);
+
+      if (r.obs) {
+        var o = document.createElement("div");
+        o.className = "obs";
+        o.textContent = r.obs;
+        linha.appendChild(o);
+      }
+      hist.appendChild(linha);
+    });
+  }
+
+  // ====== INÍCIO ======
+  (function iniciar() {
+    var sel = document.getElementById("materia");
+    MATERIAS.forEach(function (m) {
+      var op = document.createElement("option");
+      op.value = m.nome;
+      op.textContent = m.nome;
+      sel.appendChild(op);
+    });
+    document.getElementById("data").value = hoje();
+    desenhar();
+  })();
+</script>
+</body>
+</html>
