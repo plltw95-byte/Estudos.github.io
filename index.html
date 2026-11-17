@@ -5,633 +5,466 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meu Diário de Estudos</title>
 <style>
-  :root {
-    --bg: #f4f6fb;
-    --card: #ffffff;
-    --text: #1f2937;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --accent: #4f46e5;
-    --fire: #f97316;
-    --laranja: #ee6c2b;
-    --estudo-bg: #dcfce7;
-    --estudo-borda: #22c55e;
-    --hora-bg: #eef0f4;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f1220;
-      --card: #1a1e33;
-      --text: #e8eaf6;
-      --muted: #9aa0b8;
-      --border: #2c3150;
-      --accent: #818cf8;
-      --fire: #fb923c;
-      --laranja: #d9581a;
-      --estudo-bg: #14391f;
-      --estudo-borda: #22c55e;
-      --hora-bg: #232845;
-    }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.5;
-  }
-  .container { max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; }
-  h1 { margin: 0 0 4px; font-size: 1.7rem; }
-  h2 { margin: 0 0 14px; font-size: 1.15rem; }
-  .sub { color: var(--muted); margin: 0 0 20px; }
-  .dica { color: var(--muted); font-size: .85rem; margin: 0 0 12px; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 18px;
-  }
-
-  /* Ofensiva */
-  .streak { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .streak .fogo { font-size: 3rem; line-height: 1; }
-  .streak .num { font-size: 2.6rem; font-weight: 800; color: var(--fire); line-height: 1; }
-  .streak .info { color: var(--muted); font-size: .95rem; }
-  .streak .status { font-weight: 600; color: var(--text); }
-  .streak .recorde { margin-left: auto; text-align: right; }
-
-  /* Formulário */
-  .form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-  label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
-  input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 1rem;
-    font-family: inherit;
-  }
-  .full { grid-column: 1 / -1; }
-  button {
-    cursor: pointer;
-    border: none;
-    border-radius: 8px;
-    padding: 11px 18px;
-    font-size: 1rem;
-    font-weight: 600;
-    background: var(--accent);
-    color: #fff;
-  }
-  button:hover { opacity: .9; }
-  button.mini {
-    padding: 5px 10px;
-    font-size: .8rem;
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-  button.mini:hover { color: var(--text); }
-  button.sec {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-
-  /* Totais */
-  .totais { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
-  .total-item {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    border-left: 5px solid var(--cor);
-  }
-  .total-item .nome { font-size: .85rem; color: var(--muted); }
-  .total-item .valor { font-size: 1.3rem; font-weight: 700; }
-  .total-geral { margin-top: 14px; font-weight: 600; }
-
-  /* Histórico */
-  .registro {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .registro:last-child { border-bottom: none; }
-  .bolinha { width: 12px; height: 12px; border-radius: 50%; background: var(--cor); flex-shrink: 0; }
-  .registro .materia { font-weight: 600; }
-  .registro .data { color: var(--muted); font-size: .85rem; }
-  .registro .obs { color: var(--muted); font-size: .9rem; flex-basis: 100%; padding-left: 22px; }
-  .registro .tempo { margin-left: auto; font-weight: 600; }
-  .vazio { color: var(--muted); text-align: center; padding: 14px 0; }
-
-  /* Tabela de horários */
-  .tabela-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
-  table.horario { border-collapse: collapse; width: 100%; min-width: 820px; }
-  table.horario thead th {
-    background: var(--laranja);
-    color: #fff;
-    padding: 12px 8px;
-    font-size: .9rem;
-    letter-spacing: .03em;
-    text-align: left;
-  }
-  table.horario td {
-    padding: 0;
-    border-bottom: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-    vertical-align: top;
-  }
-  table.horario td:last-child { border-right: none; }
-  table.horario td.col-hora { background: var(--hora-bg); width: 90px; }
-  table.horario td.col-del { width: 44px; text-align: center; vertical-align: middle; }
-  table.horario input.hora {
-    width: 100%;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    font-weight: 600;
-    padding: 12px 8px;
-  }
-  table.horario textarea {
-    display: block;
-    width: 100%;
-    height: 58px;
-    resize: none;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    padding: 8px;
-    font-size: .92rem;
-  }
-  table.horario textarea.estudo {
-    background: var(--estudo-bg);
-    box-shadow: inset 0 0 0 2px var(--estudo-borda);
-  }
-  table.horario input:focus, table.horario textarea:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: -2px;
-  }
-  .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+:root{--bg:#f4f6fb;--card:#fff;--text:#1f2937;--muted:#6b7280;--border:#e5e7eb;--accent:#4f46e5;--fire:#f97316;--laranja:#ee6c2b;--eb:#dcfce7;--ebo:#22c55e;--hb:#eef0f4;--hj:#e0e7ff;--pv:#fee2e2}
+:root[data-t=dark]{--bg:#0f1220;--card:#1a1e33;--text:#e8eaf6;--muted:#9aa0b8;--border:#2c3150;--accent:#818cf8;--fire:#fb923c;--laranja:#d9581a;--eb:#14391f;--hb:#232845;--hj:#2b3170;--pv:#4a1d24}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.container{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+h1{margin:0 0 4px;font-size:1.7rem}h2{margin:0 0 14px;font-size:1.15rem}
+.sub{color:var(--muted);margin:0}.dica{color:var(--muted);font-size:.85rem;margin:0 0 12px}
+.topo{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px}
+.streak{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.fogo{font-size:3rem;line-height:1}.num{font-size:2.6rem;font-weight:800;color:var(--fire);line-height:1}
+.info{color:var(--muted);font-size:.95rem}.status{font-weight:600;color:var(--text)}.recorde{margin-left:auto;text-align:right}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:1rem;font-family:inherit}
+.full{grid-column:1/-1}
+button{cursor:pointer;border:none;border-radius:8px;padding:11px 18px;font-size:1rem;font-weight:600;background:var(--accent);color:#fff}
+button:hover{opacity:.9}
+button.mini{padding:5px 10px;font-size:.8rem;background:transparent;color:var(--muted);border:1px solid var(--border)}
+button.sec{background:transparent;color:var(--text);border:1px solid var(--border)}
+button.festa{background:linear-gradient(90deg,#ec4899,#f59e0b)}
+.acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.barra{height:12px;border-radius:6px;background:var(--border);overflow:hidden;margin-top:10px}
+.barra>div{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#ec4899);transition:width .4s}
+.frase{font-style:italic;color:var(--muted);margin-top:12px}
+.linha2{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.grande{font-size:2.4rem;font-weight:800;color:var(--accent);line-height:1}
+.relogio{font-size:3.2rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.contagem{display:flex;align-items:center;gap:22px;flex-wrap:wrap}.campo{margin-left:auto;min-width:170px}
+.cal-topo{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.cal-topo .titulo{font-weight:700;font-size:1.1rem}.nav{display:flex;gap:6px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-sem{text-align:center;font-size:.75rem;color:var(--muted);font-weight:600}
+.cal-dia{min-height:46px;border:1px solid var(--border);border-radius:8px;padding:4px 6px;font-size:.85rem;position:relative}
+.cal-dia.vazio{border:none}.cal-dia.hoje{background:var(--hj);border-color:var(--accent);font-weight:700}
+.cal-dia.prova{background:var(--pv);border-color:#ef4444;font-weight:700}
+.cal-dia .ponto{position:absolute;left:6px;bottom:5px;width:8px;height:8px;border-radius:50%;background:var(--ebo)}
+.cal-dia .alvo{position:absolute;right:4px;bottom:2px}
+.leg{margin-top:12px;font-size:.8rem;color:var(--muted)}
+.graf-h{display:grid;grid-template-columns:90px 1fr 70px;gap:8px;align-items:center;margin-bottom:8px;font-size:.9rem}
+.graf-h .trilho{height:16px;background:var(--border);border-radius:8px;overflow:hidden}
+.graf-h .trilho>div{height:100%;background:var(--cor);border-radius:8px}
+.graf-v{display:flex;align-items:flex-end;gap:8px;height:150px;margin-top:8px}
+.graf-v .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:.7rem;color:var(--muted)}
+.graf-v .col div.b{width:100%;background:var(--accent);border-radius:6px 6px 0 0;min-height:2px}
+.totais{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.total-item{border:1px solid var(--border);border-radius:10px;padding:12px;border-left:5px solid var(--cor)}
+.total-item .nome{font-size:.85rem;color:var(--muted)}.total-item .valor{font-size:1.3rem;font-weight:700}
+.selos{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.selo{border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;gap:10px;align-items:center}
+.selo.off{opacity:.35;filter:grayscale(1)}.selo .ic{font-size:1.8rem}.selo small{color:var(--muted);display:block}
+.registro{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.registro:last-child{border-bottom:none}
+.bolinha{width:12px;height:12px;border-radius:50%;background:var(--cor)}
+.registro .materia{font-weight:600}.registro .data{color:var(--muted);font-size:.85rem}
+.registro .obs{color:var(--muted);font-size:.9rem;flex-basis:100%;padding-left:22px}
+.registro .tempo{margin-left:auto;font-weight:600}.vazio{color:var(--muted);text-align:center;padding:14px 0}
+.tabela-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+table.horario{border-collapse:collapse;width:100%;min-width:820px}
+table.horario th{background:var(--laranja);color:#fff;padding:12px 8px;font-size:.9rem;text-align:left}
+table.horario td{padding:0;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top}
+table.horario td.col-hora{background:var(--hb);width:90px}
+table.horario td.col-del{width:44px;text-align:center;vertical-align:middle}
+table.horario input.hora{border:none;border-radius:0;background:transparent;font-weight:600;padding:12px 8px}
+table.horario textarea{display:block;height:58px;resize:none;border:none;border-radius:0;background:transparent;padding:8px;font-size:.92rem}
+table.horario textarea.estudo{background:var(--eb);box-shadow:inset 0 0 0 2px var(--ebo)}
 </style>
 </head>
 <body>
 <div class="container">
+  <div class="topo">
+    <div><h1>📚 Meu Diário de Estudos</h1><p class="sub">Registre suas horas e mantenha a ofensiva até o vestibular.</p></div>
+    <button class="sec" id="btnTema" onclick="alternarTema()">🌙 Tema</button>
+  </div>
 
-  <h1>📚 Meu Diário de Estudos</h1>
-  <p class="sub">Registre suas horas e mantenha a ofensiva até o vestibular.</p>
-
-  <!-- OFENSIVA -->
   <div class="card streak">
     <div class="fogo" id="fogo">🔥</div>
-    <div>
-      <div class="num" id="streakNum">0</div>
-      <div class="info">dias seguidos de ofensiva</div>
-    </div>
+    <div><div class="num" id="streakNum">0</div><div class="info">dias seguidos de ofensiva</div></div>
     <div class="info status" id="streakStatus"></div>
-    <div class="info recorde">
-      Maior ofensiva<br>
-      <strong id="melhorStreak">0</strong> dias
-    </div>
+    <div class="info recorde">Maior ofensiva<br><strong id="melhorStreak">0</strong> dias</div>
   </div>
 
-  <!-- HORÁRIO SEMANAL -->
   <div class="card">
-    <h2>🗓️ Meu horário semanal</h2>
-    <p class="dica">Clique em qualquer célula para editar. Tudo é salvo automaticamente. Células com a palavra "estudar" ficam destacadas em verde.</p>
-    <div class="tabela-wrap">
-      <table class="horario">
-        <thead id="horarioCabecalho"></thead>
-        <tbody id="horarioCorpo"></tbody>
-      </table>
+    <h2>🎯 Meta de hoje</h2>
+    <div class="linha2">
+      <div><div class="grande" id="hojeTempo">0min</div><div class="info" id="hojeMeta"></div></div>
+      <div style="min-width:150px"><label for="metaHoras">Meta diária (horas)</label><input type="number" id="metaHoras" min="0.5" max="16" step="0.5" onchange="mudarMeta()"></div>
+    </div>
+    <div class="barra"><div id="barraMeta"></div></div>
+    <div class="frase" id="frase"></div>
+  </div>
+
+  <div class="card">
+    <h2>⏱️ Cronômetro Pomodoro</h2>
+    <p class="dica">25 min de foco + 5 de pausa. Ao terminar o foco, o registro é criado sozinho.</p>
+    <div class="linha2">
+      <div><div class="relogio" id="relogio">25:00</div><div class="info" id="pomoModo">Foco</div></div>
+      <div style="min-width:180px"><label for="pomoMateria">Matéria do foco</label><select id="pomoMateria"></select></div>
     </div>
     <div class="acoes">
-      <button onclick="addLinha()">+ Adicionar horário</button>
-      <button class="sec" onclick="restaurarHorario()">Restaurar modelo</button>
+      <button onclick="pomoIniciar()">▶ Iniciar</button>
+      <button class="sec" onclick="pomoPausar()">⏸ Pausar</button>
+      <button class="sec" onclick="pomoZerar()">↺ Zerar</button>
     </div>
   </div>
 
-  <!-- NOVO REGISTRO -->
+  <div class="card">
+    <h2>🏁 Contagem regressiva para o vestibular</h2>
+    <div class="contagem">
+      <div><div class="grande" id="contDias">0</div><div class="info" id="contLegenda">dias restantes</div><div class="info" id="contDetalhe"></div></div>
+      <div class="campo"><label for="dataProva">Data da prova</label><input type="date" id="dataProva" onchange="mudarProva()"></div>
+    </div>
+    <div class="barra"><div id="barraProgresso"></div></div>
+    <div class="info" id="barraTexto" style="font-size:.8rem;margin-top:6px"></div>
+    <div class="acoes"><button class="festa" onclick="confete()">🎉 Soltar confete</button></div>
+  </div>
+
+  <div class="card">
+    <h2>📅 Calendário</h2>
+    <div class="cal-topo">
+      <div class="titulo" id="calTitulo"></div>
+      <div class="nav"><button class="mini" onclick="mudarMes(-1)">‹ Anterior</button><button class="mini" onclick="irParaHoje()">Hoje</button><button class="mini" onclick="mudarMes(1)">Próximo ›</button></div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="leg">🟢 dia com estudo · ⭐ meta batida · 🎯 dia da prova</div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Gráficos</h2>
+    <div id="grafMaterias"></div>
+    <h2 style="margin-top:22px">Horas por semana (últimas 8)</h2>
+    <div class="graf-v" id="grafSemanas"></div>
+  </div>
+
+  <div class="card">
+    <h2>🗓️ Meu horário semanal</h2>
+    <p class="dica">Clique em qualquer célula para editar. Salva automaticamente. Células com "estudar" ficam verdes.</p>
+    <div class="tabela-wrap"><table class="horario"><thead id="horarioCabecalho"></thead><tbody id="horarioCorpo"></tbody></table></div>
+    <div class="acoes"><button onclick="addLinha()">+ Adicionar horário</button><button class="sec" onclick="restaurarHorario()">Restaurar modelo</button></div>
+  </div>
+
   <div class="card">
     <h2>Novo registro</h2>
     <div class="form">
-      <div>
-        <label for="materia">Matéria</label>
-        <select id="materia"></select>
-      </div>
-      <div>
-        <label for="data">Data</label>
-        <input type="date" id="data">
-      </div>
-      <div>
-        <label for="horas">Horas</label>
-        <input type="number" id="horas" min="0" max="24" value="1">
-      </div>
-      <div>
-        <label for="minutos">Minutos</label>
-        <input type="number" id="minutos" min="0" max="59" value="0">
-      </div>
-      <div class="full">
-        <label for="obs">O que você estudou? (opcional)</label>
-        <input type="text" id="obs" placeholder="Ex: Cinemática, lista de exercícios 3">
-      </div>
-      <div class="full">
-        <button onclick="adicionar()">Adicionar registro</button>
-      </div>
+      <div><label for="materia">Matéria</label><select id="materia"></select></div>
+      <div><label for="data">Data</label><input type="date" id="data"></div>
+      <div><label for="horas">Horas</label><input type="number" id="horas" min="0" max="24" value="1"></div>
+      <div><label for="minutos">Minutos</label><input type="number" id="minutos" min="0" max="59" value="0"></div>
+      <div class="full"><label for="obs">O que você estudou? (opcional)</label><input type="text" id="obs" placeholder="Ex: Cinemática, lista 3"></div>
+      <div class="full"><button onclick="adicionar()">Adicionar registro</button></div>
     </div>
   </div>
 
-  <!-- TOTAIS -->
-  <div class="card">
-    <h2>Total por matéria</h2>
-    <div class="totais" id="totais"></div>
-    <div class="total-geral" id="totalGeral"></div>
-  </div>
+  <div class="card"><h2>Total por matéria</h2><div class="totais" id="totais"></div><div id="totalGeral" style="margin-top:14px;font-weight:600"></div></div>
 
-  <!-- HISTÓRICO -->
-  <div class="card">
-    <h2>Histórico</h2>
-    <div id="historico"></div>
-  </div>
+  <div class="card"><h2>🏅 Conquistas</h2><div class="selos" id="selos"></div></div>
 
+  <div class="card"><h2>Histórico</h2><div id="historico"></div></div>
+
+  <div class="card">
+    <h2>💾 Backup</h2>
+    <p class="dica">Baixe um arquivo com todos os seus dados e guarde em um lugar seguro. Use "Restaurar" para recuperar ou levar para outro aparelho.</p>
+    <div class="acoes">
+      <button onclick="exportar()">⬇ Baixar backup</button>
+      <button class="sec" onclick="document.getElementById('arq').click()">⬆ Restaurar backup</button>
+      <input type="file" id="arq" accept=".json,application/json" style="display:none" onchange="importar(this)">
+    </div>
+  </div>
 </div>
 
 <script>
-  // ====== CONFIGURAÇÃO ======
-  var MATERIAS = [
-    { nome: "Física",     cor: "#3b82f6" },
-    { nome: "Matemática", cor: "#ef4444" },
-    { nome: "Biologia",   cor: "#22c55e" },
-    { nome: "Química",    cor: "#a855f7" },
-    { nome: "História",   cor: "#f59e0b" },
-    { nome: "Geografia",  cor: "#14b8a6" }
-  ];
-  var DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-  var CHAVE = "diario_estudos_v1";
+var MATERIAS=[{nome:"Física",cor:"#3b82f6"},{nome:"Matemática",cor:"#ef4444"},{nome:"Biologia",cor:"#22c55e"},{nome:"Química",cor:"#a855f7"},{nome:"História",cor:"#f59e0b"},{nome:"Geografia",cor:"#14b8a6"}];
+var DIAS_SEMANA=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+var MESES=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+var FRASES=["Pequenos passos todos os dias levam longe.","Disciplina vence motivação.","Hoje você estuda para agradecer ao você do futuro.","Não precisa ser perfeito, precisa ser constante.","Cada hora de estudo é um tijolo da sua aprovação.","Cansaço passa, aprovação fica.","Foque no processo, o resultado vem.","Quem persiste, passa.","Um dia de cada vez, uma matéria de cada vez.","Você está mais perto hoje do que ontem.","Faça hoje o que os outros não fazem e conquiste o que eles não têm.","Errar na lista é melhor do que errar na prova.","A sua ofensiva é a sua promessa diária.","Acredite: o esforço de agora vira a vaga de amanhã.","Comece, mesmo que seja por 10 minutos."];
+var FOCO=25,PAUSA=5,CHAVE="diario_estudos_v1";
 
-  // Modelo inicial do horário (igual ao da imagem; sábado e domingo ficam vazios)
-  function horarioPadrao() {
-    function semana(texto) {
-      var c = [texto, texto, texto, texto, texto, "", ""];
-      return c;
-    }
-    return [
-      { hora: "05:00", celulas: semana("dormir") },
-      { hora: "06:00", celulas: semana("acordar / banho / café") },
-      { hora: "07:00", celulas: semana("transporte") },
-      { hora: "08:00", celulas: semana("trabalho") },
-      { hora: "12:00", celulas: semana("almoço") },
-      { hora: "13:00", celulas: semana("revisão") },
-      { hora: "14:00", celulas: semana("trabalho") },
-      { hora: "18:00", celulas: semana("transporte") },
-      { hora: "19:00", celulas: semana("jantar / banho") },
-      { hora: "20:00", celulas: semana("estudar") },
-      { hora: "23:00", celulas: semana("dormir") }
-    ];
-  }
+function horarioPadrao(){function s(t){return[t,t,t,t,t,"",""]}
+return[{hora:"05:00",celulas:s("dormir")},{hora:"06:00",celulas:s("acordar / banho / café")},{hora:"07:00",celulas:s("transporte")},{hora:"08:00",celulas:s("trabalho")},{hora:"12:00",celulas:s("almoço")},{hora:"13:00",celulas:s("revisão")},{hora:"14:00",celulas:s("trabalho")},{hora:"18:00",celulas:s("transporte")},{hora:"19:00",celulas:s("jantar / banho")},{hora:"20:00",celulas:s("estudar")},{hora:"23:00",celulas:s("dormir")}]}
 
-  // ====== DADOS (salvos no navegador) ======
-  function carregar() {
-    try {
-      var d = JSON.parse(localStorage.getItem(CHAVE));
-      if (d && d.registros && d.dias) {
-        if (!d.horario || !d.horario.length) d.horario = horarioPadrao();
-        return d;
-      }
-    } catch (e) {}
-    return { registros: [], dias: [], horario: horarioPadrao() };
-  }
-  function salvar() {
-    try { localStorage.setItem(CHAVE, JSON.stringify(dados)); } catch (e) {
-      alert("Não consegui salvar. Verifique se o navegador permite armazenamento.");
-    }
-  }
-  var dados = carregar();
+/* ===== DADOS ===== */
+function carregar(){
+  try{var d=JSON.parse(localStorage.getItem(CHAVE));
+    if(d&&d.registros&&d.dias){
+      if(!d.horario||!d.horario.length)d.horario=horarioPadrao();
+      if(!d.prova)d.prova=daquiUmAno();
+      if(!d.inicio)d.inicio=hoje();
+      if(!d.meta)d.meta=120;
+      return d;}}catch(e){}
+  return{registros:[],dias:[],horario:horarioPadrao(),inicio:hoje(),prova:daquiUmAno(),meta:120,tema:null};
+}
+function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(dados))}catch(e){alert("Não consegui salvar. Verifique se o navegador permite armazenamento.")}}
+var dados=carregar();
 
-  // ====== DATAS ======
-  function paraTexto(d) {
-    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-  }
-  function hoje() { return paraTexto(new Date()); }
-  function paraData(texto) {
-    var p = texto.split("-");
-    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-  }
-  function diaAnterior(texto) {
-    var d = paraData(texto);
-    d.setDate(d.getDate() - 1);
-    return paraTexto(d);
-  }
-  function formatarData(texto) {
-    var p = texto.split("-");
-    return p[2] + "/" + p[1] + "/" + p[0];
-  }
+/* ===== DATAS ===== */
+function paraTexto(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function hoje(){return paraTexto(new Date())}
+function paraData(t){var p=t.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function somarDias(t,n){var d=paraData(t);d.setDate(d.getDate()+n);return paraTexto(d)}
+function diaAnterior(t){return somarDias(t,-1)}
+function daquiUmAno(){var d=new Date();d.setFullYear(d.getFullYear()+1);return paraTexto(d)}
+function formatarData(t){var p=t.split("-");return p[2]+"/"+p[1]+"/"+p[0]}
+function diferencaDias(a,b){return Math.round((paraData(b)-paraData(a))/86400000)}
+function formatarTempo(min){var h=Math.floor(min/60),m=min%60;if(!h)return m+"min";if(!m)return h+"h";return h+"h "+String(m).padStart(2,"0")+"min"}
+function corDa(n){for(var i=0;i<MATERIAS.length;i++)if(MATERIAS[i].nome===n)return MATERIAS[i].cor;return"#888"}
+function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e}
 
-  // ====== OFENSIVA ======
-  // Um dia conta quando você adiciona, edita ou apaga algum registro de estudo nele.
-  function marcarHoje() {
-    var h = hoje();
-    if (dados.dias.indexOf(h) === -1) dados.dias.push(h);
-  }
+/* ===== TEMA ===== */
+function temaAtual(){return dados.tema||(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}
+function aplicarTema(){var t=temaAtual();document.documentElement.setAttribute("data-t",t);document.getElementById("btnTema").textContent=t==="dark"?"☀️ Claro":"🌙 Escuro"}
+function alternarTema(){dados.tema=temaAtual()==="dark"?"light":"dark";salvar();aplicarTema()}
 
-  function calcularOfensiva() {
-    var set = {};
-    dados.dias.forEach(function (d) { set[d] = true; });
-    var h = hoje();
-    var cursor;
-    if (set[h]) cursor = h;
-    else if (set[diaAnterior(h)]) cursor = diaAnterior(h);
-    else return 0;
-    var cont = 0;
-    while (set[cursor]) {
-      cont++;
-      cursor = diaAnterior(cursor);
-    }
-    return cont;
-  }
+/* ===== OFENSIVA ===== */
+function marcarHoje(){var h=hoje();if(dados.dias.indexOf(h)===-1){dados.dias.push(h);return true}return false}
+function calcularOfensiva(){var s={};dados.dias.forEach(function(d){s[d]=1});var h=hoje(),c;
+  if(s[h])c=h;else if(s[diaAnterior(h)])c=diaAnterior(h);else return 0;
+  var n=0;while(s[c]){n++;c=diaAnterior(c)}return n}
+function calcularMelhor(){var o=dados.dias.slice().sort(),m=0,a=0,p=null;
+  o.forEach(function(d){if(p!==null&&diaAnterior(d)===p)a++;else a=1;if(a>m)m=a;p=d});return m}
+function minHoje(){var h=hoje(),t=0;dados.registros.forEach(function(r){if(r.data===h)t+=r.minutos});return t}
 
-  function calcularMelhor() {
-    var ordenados = dados.dias.slice().sort();
-    var melhor = 0, atual = 0, anterior = null;
-    ordenados.forEach(function (d) {
-      if (anterior !== null && diaAnterior(d) === anterior) atual++;
-      else atual = 1;
-      if (atual > melhor) melhor = atual;
-      anterior = d;
+/* ===== REGISTROS ===== */
+function addReg(materia,data,min,obs){
+  var antes=minHoje();
+  dados.registros.push({id:Date.now()+Math.floor(Math.random()*1000),materia:materia,data:data,minutos:min,obs:obs||""});
+  var novo=marcarHoje();salvar();desenhar();
+  var depois=minHoje();
+  if(antes<dados.meta&&depois>=dados.meta)confete();
+  else if(novo&&[7,30,100,200,365].indexOf(calcularOfensiva())>-1)confete();
+}
+function adicionar(){
+  var m=document.getElementById("materia").value,d=document.getElementById("data").value;
+  var h=parseInt(document.getElementById("horas").value,10)||0,mi=parseInt(document.getElementById("minutos").value,10)||0;
+  var obs=document.getElementById("obs").value.trim(),t=h*60+mi;
+  if(!d){alert("Escolha uma data.");return}
+  if(t<=0){alert("Informe um tempo de estudo maior que zero.");return}
+  addReg(m,d,t,obs);
+  document.getElementById("obs").value="";document.getElementById("horas").value=1;document.getElementById("minutos").value=0;
+}
+function editar(id){var r=dados.registros.find(function(x){return x.id===id});if(!r)return;
+  var resp=prompt("Novo tempo em minutos (atual: "+r.minutos+"):",r.minutos);if(resp===null)return;
+  var n=parseInt(resp,10);if(isNaN(n)||n<=0){alert("Digite um número de minutos válido.");return}
+  r.minutos=n;marcarHoje();salvar();desenhar()}
+function apagar(id){if(!confirm("Apagar este registro?"))return;
+  dados.registros=dados.registros.filter(function(x){return x.id!==id});marcarHoje();salvar();desenhar()}
+function mudarMeta(){var v=parseFloat(document.getElementById("metaHoras").value);
+  if(isNaN(v)||v<=0)v=2;dados.meta=Math.round(v*60);salvar();desenhar()}
+
+/* ===== POMODORO ===== */
+var pomo={modo:"foco",restante:FOCO*60,fim:null,timer:null};
+function pomoTexto(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function pomoDesenhar(){
+  var s=pomo.fim?Math.max(0,Math.ceil((pomo.fim-Date.now())/1000)):pomo.restante;
+  document.getElementById("relogio").textContent=pomoTexto(s);
+  document.getElementById("pomoModo").textContent=pomo.modo==="foco"?"Foco":"Pausa";
+  document.title=pomo.fim?pomoTexto(s)+" · Estudos":"Meu Diário de Estudos";
+}
+function pomoIniciar(){if(pomo.fim)return;pomo.fim=Date.now()+pomo.restante*1000;pomo.timer=setInterval(pomoTick,500);pomoDesenhar()}
+function pomoPausar(){if(!pomo.fim)return;pomo.restante=Math.max(1,Math.ceil((pomo.fim-Date.now())/1000));pomo.fim=null;clearInterval(pomo.timer);pomoDesenhar()}
+function pomoZerar(){clearInterval(pomo.timer);pomo.fim=null;pomo.modo="foco";pomo.restante=FOCO*60;pomoDesenhar()}
+function pomoTick(){
+  if(Date.now()<pomo.fim){pomoDesenhar();return}
+  clearInterval(pomo.timer);pomo.fim=null;
+  try{var c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.connect(c.destination);o.start();setTimeout(function(){o.stop()},500)}catch(e){}
+  if(pomo.modo==="foco"){
+    pomo.modo="pausa";pomo.restante=PAUSA*60;
+    addReg(document.getElementById("pomoMateria").value,hoje(),FOCO,"Pomodoro");
+    alert("Foco concluído! Registro de "+FOCO+" min criado. Hora da pausa.");
+  }else{pomo.modo="foco";pomo.restante=FOCO*60;alert("Pausa terminou. Bora voltar ao foco!")}
+  pomoDesenhar();
+}
+
+/* ===== CONTAGEM ===== */
+function desenharContagem(){
+  var r=diferencaDias(hoje(),dados.prova),el=document.getElementById("contDias"),leg=document.getElementById("contLegenda"),det=document.getElementById("contDetalhe");
+  document.getElementById("dataProva").value=dados.prova;
+  if(r>0){el.textContent=r;leg.textContent=r===1?"dia restante":"dias restantes";
+    det.textContent="≈ "+Math.floor(r/7)+" semanas · ≈ "+Math.floor(r/30.44)+" meses · prova em "+formatarData(dados.prova)}
+  else if(r===0){el.textContent="🍀";leg.textContent="É hoje! Boa prova!";det.textContent=""}
+  else{el.textContent="—";leg.textContent="Essa data já passou.";det.textContent="Escolha uma nova data da prova."}
+  var total=diferencaDias(dados.inicio,dados.prova),passou=diferencaDias(dados.inicio,hoje());
+  var pct=total>0?Math.max(0,Math.min(100,passou/total*100)):100;
+  document.getElementById("barraProgresso").style.width=pct+"%";
+  document.getElementById("barraTexto").textContent="Você já percorreu "+Math.round(pct)+"% do caminho (desde "+formatarData(dados.inicio)+").";
+}
+function mudarProva(){var v=document.getElementById("dataProva").value;if(!v)return;dados.prova=v;dados.inicio=hoje();salvar();desenhar()}
+
+/* ===== CALENDÁRIO ===== */
+var ag=new Date(),mv={ano:ag.getFullYear(),mes:ag.getMonth()};
+function mudarMes(n){mv.mes+=n;if(mv.mes<0){mv.mes=11;mv.ano--}if(mv.mes>11){mv.mes=0;mv.ano++}desenharCalendario()}
+function irParaHoje(){var n=new Date();mv={ano:n.getFullYear(),mes:n.getMonth()};desenharCalendario()}
+function desenharCalendario(){
+  document.getElementById("calTitulo").textContent=MESES[mv.mes]+" "+mv.ano;
+  var porDia={};dados.registros.forEach(function(r){porDia[r.data]=(porDia[r.data]||0)+r.minutos});
+  var g=document.getElementById("calGrid");g.innerHTML="";
+  ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].forEach(function(s){g.appendChild(mk("div","cal-sem",s))});
+  var prim=new Date(mv.ano,mv.mes,1).getDay(),tot=new Date(mv.ano,mv.mes+1,0).getDate(),h=hoje();
+  for(var i=0;i<prim;i++)g.appendChild(mk("div","cal-dia vazio"));
+  for(var d=1;d<=tot;d++){
+    var t=paraTexto(new Date(mv.ano,mv.mes,d)),c=mk("div","cal-dia",d);
+    if(t===h)c.classList.add("hoje");
+    if(t===dados.prova){c.classList.add("prova");c.appendChild(mk("span","alvo","🎯"));c.title="Dia da prova"}
+    if(porDia[t]){c.appendChild(mk("span","ponto"));c.title="Estudou "+formatarTempo(porDia[t]);
+      if(porDia[t]>=dados.meta)c.appendChild(mk("span","alvo","⭐"))}
+    g.appendChild(c);
+  }
+}
+
+/* ===== GRÁFICOS ===== */
+function desenharGraficos(){
+  var somas={};MATERIAS.forEach(function(m){somas[m.nome]=0});
+  dados.registros.forEach(function(r){somas[r.materia]=(somas[r.materia]||0)+r.minutos});
+  var max=Math.max.apply(null,MATERIAS.map(function(m){return somas[m.nome]}).concat([1]));
+  var box=document.getElementById("grafMaterias");box.innerHTML="";
+  box.appendChild(mk("h2","","Horas por matéria"));
+  MATERIAS.forEach(function(m){
+    var l=mk("div","graf-h");l.style.setProperty("--cor",m.cor);
+    var tr=mk("div","trilho"),f=mk("div");f.style.width=(somas[m.nome]/max*100)+"%";tr.appendChild(f);
+    l.appendChild(mk("span","",m.nome));l.appendChild(tr);l.appendChild(mk("span","",formatarTempo(somas[m.nome])));box.appendChild(l);
+  });
+  var seg=new Date();seg.setDate(seg.getDate()-((seg.getDay()+6)%7));var ini=paraTexto(seg);
+  var sem=[];for(var i=7;i>=0;i--){var a=somarDias(ini,-7*i),b=somarDias(a,6),t=0;
+    dados.registros.forEach(function(r){if(r.data>=a&&r.data<=b)t+=r.minutos});
+    sem.push({a:a,t:t})}
+  var mx=Math.max.apply(null,sem.map(function(s){return s.t}).concat([1]));
+  var gv=document.getElementById("grafSemanas");gv.innerHTML="";
+  sem.forEach(function(s){
+    var col=mk("div","col");col.appendChild(mk("span","",s.t?formatarTempo(s.t):""));
+    var b=mk("div","b");b.style.height=(s.t/mx*100)+"px";col.appendChild(b);
+    var p=s.a.split("-");col.appendChild(mk("span","",p[2]+"/"+p[1]));gv.appendChild(col);
+  });
+}
+
+/* ===== CONQUISTAS ===== */
+function desenharSelos(){
+  var total=0,mats={};dados.registros.forEach(function(r){total+=r.minutos;mats[r.materia]=1});
+  var melhor=calcularMelhor(),porDia={};dados.registros.forEach(function(r){porDia[r.data]=(porDia[r.data]||0)+r.minutos});
+  var bateu=Object.keys(porDia).some(function(k){return porDia[k]>=dados.meta});
+  var L=[["🌱","Primeiro passo","Faça 1 registro",dados.registros.length>=1],
+    ["🔥","Semana de fogo","Ofensiva de 7 dias",melhor>=7],
+    ["🌋","Mês imparável","Ofensiva de 30 dias",melhor>=30],
+    ["💎","Lenda","Ofensiva de 100 dias",melhor>=100],
+    ["⏰","10 horas","Estude 10h no total",total>=600],
+    ["📖","50 horas","Estude 50h no total",total>=3000],
+    ["🏆","100 horas","Estude 100h no total",total>=6000],
+    ["🎓","500 horas","Estude 500h no total",total>=30000],
+    ["⭐","Meta batida","Bata a meta diária",bateu],
+    ["🧠","Equilibrado","Estude as 6 matérias",Object.keys(mats).length>=MATERIAS.length]];
+  var b=document.getElementById("selos");b.innerHTML="";
+  L.forEach(function(x){var s=mk("div","selo"+(x[3]?"":" off"));s.appendChild(mk("span","ic",x[0]));
+    var t=mk("div");t.appendChild(mk("strong","",x[1]));t.appendChild(mk("small","",x[2]));s.appendChild(t);b.appendChild(s)});
+}
+
+/* ===== CONFETE ===== */
+function confete(){
+  var cv=document.createElement("canvas");cv.style.cssText="position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999";
+  cv.width=innerWidth;cv.height=innerHeight;document.body.appendChild(cv);var ctx=cv.getContext("2d");
+  var cores=["#ef4444","#f59e0b","#22c55e","#3b82f6","#a855f7","#ec4899","#14b8a6"],p=[];
+  for(var i=0;i<180;i++)p.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.6,w:6+Math.random()*8,h:8+Math.random()*10,c:cores[Math.floor(Math.random()*cores.length)],vy:2+Math.random()*4,vx:-1.5+Math.random()*3,a:Math.random()*6.28,g:-.2+Math.random()*.4,f:Math.random()*6.28});
+  var t0=Date.now();
+  (function q(){ctx.clearRect(0,0,cv.width,cv.height);var v=0;
+    p.forEach(function(e){e.y+=e.vy;e.x+=e.vx+Math.sin(e.f+e.y/40)*.8;e.a+=e.g;if(e.y<cv.height+30)v++;
+      ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.a);ctx.fillStyle=e.c;ctx.fillRect(-e.w/2,-e.h/2,e.w,e.h);ctx.restore()});
+    if(v>0&&Date.now()-t0<9000)requestAnimationFrame(q);else if(cv.parentNode)cv.parentNode.removeChild(cv)})();
+}
+
+/* ===== BACKUP ===== */
+function exportar(){
+  var blob=new Blob([JSON.stringify(dados,null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="backup-estudos-"+hoje()+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function importar(inp){
+  var f=inp.files[0];if(!f)return;var rd=new FileReader();
+  rd.onload=function(){
+    try{var d=JSON.parse(rd.result);
+      if(!d||!Array.isArray(d.registros)||!Array.isArray(d.dias))throw 0;
+      if(!confirm("Isso vai SUBSTITUIR todos os dados atuais pelos do backup. Continuar?")){inp.value="";return}
+      dados=d;
+      if(!dados.horario||!dados.horario.length)dados.horario=horarioPadrao();
+      if(!dados.prova)dados.prova=daquiUmAno();if(!dados.inicio)dados.inicio=hoje();if(!dados.meta)dados.meta=120;
+      salvar();aplicarTema();desenharHorario();desenhar();alert("Backup restaurado com sucesso!");
+    }catch(e){alert("Esse arquivo não parece ser um backup válido.")}
+    inp.value="";
+  };
+  rd.readAsText(f);
+}
+
+/* ===== HORÁRIO ===== */
+function ehEstudo(t){return/estud/i.test(t)}
+function desenharHorario(){
+  var cab=document.getElementById("horarioCabecalho");cab.innerHTML="";var tr=document.createElement("tr");
+  ["HORA"].concat(DIAS_SEMANA.map(function(d){return d.toUpperCase()})).concat([""]).forEach(function(t){tr.appendChild(mk("th","",t))});
+  cab.appendChild(tr);
+  var corpo=document.getElementById("horarioCorpo");corpo.innerHTML="";
+  dados.horario.forEach(function(l,i){
+    var r=document.createElement("tr"),th=mk("td","col-hora"),ih=document.createElement("input");
+    ih.type="text";ih.className="hora";ih.value=l.hora;ih.oninput=function(){dados.horario[i].hora=ih.value;salvar()};
+    th.appendChild(ih);r.appendChild(th);
+    DIAS_SEMANA.forEach(function(dia,j){
+      var td=document.createElement("td"),ta=document.createElement("textarea");
+      ta.value=l.celulas[j]||"";ta.setAttribute("aria-label",dia+" "+l.hora);
+      if(ehEstudo(ta.value))ta.classList.add("estudo");
+      ta.oninput=function(){dados.horario[i].celulas[j]=ta.value;ta.classList.toggle("estudo",ehEstudo(ta.value));salvar()};
+      td.appendChild(ta);r.appendChild(td);
     });
-    return melhor;
-  }
+    var tdd=mk("td","col-del"),bd=mk("button","mini","✕");bd.title="Remover linha";bd.onclick=function(){removerLinha(i)};
+    tdd.appendChild(bd);r.appendChild(tdd);corpo.appendChild(r);
+  });
+}
+function addLinha(){dados.horario.push({hora:"00:00",celulas:DIAS_SEMANA.map(function(){return""})});salvar();desenharHorario()}
+function removerLinha(i){if(!confirm("Remover esta linha do horário?"))return;dados.horario.splice(i,1);salvar();desenharHorario()}
+function restaurarHorario(){if(!confirm("Isso apaga o seu horário atual e volta ao modelo inicial. Continuar?"))return;dados.horario=horarioPadrao();salvar();desenharHorario()}
 
-  // ====== FORMATAÇÃO ======
-  function formatarTempo(min) {
-    var h = Math.floor(min / 60);
-    var m = min % 60;
-    if (h === 0) return m + "min";
-    if (m === 0) return h + "h";
-    return h + "h " + String(m).padStart(2, "0") + "min";
-  }
-  function corDa(nome) {
-    for (var i = 0; i < MATERIAS.length; i++) {
-      if (MATERIAS[i].nome === nome) return MATERIAS[i].cor;
-    }
-    return "#888";
-  }
+/* ===== TELA ===== */
+function desenhar(){
+  var st=calcularOfensiva(),ativo=dados.dias.indexOf(hoje())!==-1;
+  document.getElementById("streakNum").textContent=st;
+  document.getElementById("melhorStreak").textContent=calcularMelhor();
+  document.getElementById("fogo").style.filter=st>0?"none":"grayscale(1)";
+  document.getElementById("streakStatus").textContent=ativo?"✅ Hoje já contou!":(st>0?"⚠️ Registre algo hoje para não perder a ofensiva.":"Faça um registro hoje para começar.");
 
-  // ====== AÇÕES DOS REGISTROS ======
-  function adicionar() {
-    var materia = document.getElementById("materia").value;
-    var data = document.getElementById("data").value;
-    var horas = parseInt(document.getElementById("horas").value, 10) || 0;
-    var minutos = parseInt(document.getElementById("minutos").value, 10) || 0;
-    var obs = document.getElementById("obs").value.trim();
-    var total = horas * 60 + minutos;
+  var mh=minHoje(),pct=Math.min(100,mh/dados.meta*100);
+  document.getElementById("hojeTempo").textContent=formatarTempo(mh);
+  document.getElementById("hojeMeta").textContent=mh>=dados.meta?"🎉 Meta de "+formatarTempo(dados.meta)+" batida!":"Meta: "+formatarTempo(dados.meta)+" · faltam "+formatarTempo(dados.meta-mh);
+  document.getElementById("barraMeta").style.width=pct+"%";
+  document.getElementById("metaHoras").value=dados.meta/60;
+  var dia=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/86400000);
+  document.getElementById("frase").textContent="“"+FRASES[dia%FRASES.length]+"”";
 
-    if (!data) { alert("Escolha uma data."); return; }
-    if (total <= 0) { alert("Informe um tempo de estudo maior que zero."); return; }
+  desenharContagem();desenharCalendario();desenharGraficos();desenharSelos();
 
-    dados.registros.push({
-      id: Date.now(),
-      materia: materia,
-      data: data,
-      minutos: total,
-      obs: obs
-    });
-    marcarHoje();
-    salvar();
+  var somas={},geral=0;MATERIAS.forEach(function(m){somas[m.nome]=0});
+  dados.registros.forEach(function(r){somas[r.materia]=(somas[r.materia]||0)+r.minutos;geral+=r.minutos});
+  var tt=document.getElementById("totais");tt.innerHTML="";
+  MATERIAS.forEach(function(m){var d=mk("div","total-item");d.style.setProperty("--cor",m.cor);
+    d.appendChild(mk("div","nome",m.nome));d.appendChild(mk("div","valor",formatarTempo(somas[m.nome])));tt.appendChild(d)});
+  document.getElementById("totalGeral").textContent="Total geral: "+formatarTempo(geral);
 
-    document.getElementById("obs").value = "";
-    document.getElementById("horas").value = 1;
-    document.getElementById("minutos").value = 0;
-    desenhar();
-  }
+  var hist=document.getElementById("historico");hist.innerHTML="";
+  if(!dados.registros.length){hist.appendChild(mk("div","vazio","Nenhum registro ainda. Adicione o primeiro acima!"));return}
+  dados.registros.slice().sort(function(a,b){return a.data!==b.data?(a.data<b.data?1:-1):b.id-a.id}).forEach(function(r){
+    var l=mk("div","registro");l.style.setProperty("--cor",corDa(r.materia));
+    l.appendChild(mk("span","bolinha"));l.appendChild(mk("span","materia",r.materia));l.appendChild(mk("span","data",formatarData(r.data)));
+    l.appendChild(mk("span","tempo",formatarTempo(r.minutos)));
+    var be=mk("button","mini","Editar");be.onclick=function(){editar(r.id)};
+    var bd=mk("button","mini","Apagar");bd.onclick=function(){apagar(r.id)};
+    l.appendChild(be);l.appendChild(bd);
+    if(r.obs)l.appendChild(mk("div","obs",r.obs));
+    hist.appendChild(l);
+  });
+}
 
-  function editar(id) {
-    var r = dados.registros.find(function (x) { return x.id === id; });
-    if (!r) return;
-    var resp = prompt("Novo tempo em minutos (atual: " + r.minutos + "):", r.minutos);
-    if (resp === null) return;
-    var novo = parseInt(resp, 10);
-    if (isNaN(novo) || novo <= 0) { alert("Digite um número de minutos válido."); return; }
-    r.minutos = novo;
-    marcarHoje();
-    salvar();
-    desenhar();
-  }
-
-  function apagar(id) {
-    if (!confirm("Apagar este registro?")) return;
-    dados.registros = dados.registros.filter(function (x) { return x.id !== id; });
-    marcarHoje();
-    salvar();
-    desenhar();
-  }
-
-  // ====== HORÁRIO SEMANAL ======
-  function ehEstudo(texto) {
-    return /estud/i.test(texto);
-  }
-
-  function desenharHorario() {
-    // Cabeçalho
-    var cab = document.getElementById("horarioCabecalho");
-    cab.innerHTML = "";
-    var trc = document.createElement("tr");
-    var cabecalhos = ["HORA"].concat(DIAS_SEMANA.map(function (d) { return d.toUpperCase(); })).concat([""]);
-    cabecalhos.forEach(function (t) {
-      var th = document.createElement("th");
-      th.textContent = t;
-      trc.appendChild(th);
-    });
-    cab.appendChild(trc);
-
-    // Corpo
-    var corpo = document.getElementById("horarioCorpo");
-    corpo.innerHTML = "";
-    dados.horario.forEach(function (linha, i) {
-      var tr = document.createElement("tr");
-
-      var tdHora = document.createElement("td");
-      tdHora.className = "col-hora";
-      var inHora = document.createElement("input");
-      inHora.type = "text";
-      inHora.className = "hora";
-      inHora.value = linha.hora;
-      inHora.setAttribute("aria-label", "Horário");
-      inHora.oninput = function () {
-        dados.horario[i].hora = inHora.value;
-        salvar();
-      };
-      tdHora.appendChild(inHora);
-      tr.appendChild(tdHora);
-
-      DIAS_SEMANA.forEach(function (dia, j) {
-        var td = document.createElement("td");
-        var ta = document.createElement("textarea");
-        ta.value = linha.celulas[j] || "";
-        ta.setAttribute("aria-label", dia + " " + linha.hora);
-        if (ehEstudo(ta.value)) ta.classList.add("estudo");
-        ta.oninput = function () {
-          dados.horario[i].celulas[j] = ta.value;
-          ta.classList.toggle("estudo", ehEstudo(ta.value));
-          salvar();
-        };
-        td.appendChild(ta);
-        tr.appendChild(td);
-      });
-
-      var tdDel = document.createElement("td");
-      tdDel.className = "col-del";
-      var bDel = document.createElement("button");
-      bDel.className = "mini";
-      bDel.textContent = "✕";
-      bDel.title = "Remover esta linha";
-      bDel.onclick = function () { removerLinha(i); };
-      tdDel.appendChild(bDel);
-      tr.appendChild(tdDel);
-
-      corpo.appendChild(tr);
-    });
-  }
-
-  function addLinha() {
-    var vazias = DIAS_SEMANA.map(function () { return ""; });
-    dados.horario.push({ hora: "00:00", celulas: vazias });
-    salvar();
-    desenharHorario();
-  }
-
-  function removerLinha(i) {
-    if (!confirm("Remover esta linha do horário?")) return;
-    dados.horario.splice(i, 1);
-    salvar();
-    desenharHorario();
-  }
-
-  function restaurarHorario() {
-    if (!confirm("Isso apaga o seu horário atual e volta ao modelo inicial. Continuar?")) return;
-    dados.horario = horarioPadrao();
-    salvar();
-    desenharHorario();
-  }
-
-  // ====== TELA ======
-  function desenhar() {
-    // Ofensiva
-    var streak = calcularOfensiva();
-    var ativoHoje = dados.dias.indexOf(hoje()) !== -1;
-    document.getElementById("streakNum").textContent = streak;
-    document.getElementById("melhorStreak").textContent = calcularMelhor();
-    document.getElementById("fogo").style.filter = streak > 0 ? "none" : "grayscale(1)";
-    var status = document.getElementById("streakStatus");
-    if (ativoHoje) status.textContent = "✅ Hoje já contou!";
-    else if (streak > 0) status.textContent = "⚠️ Registre algo hoje para não perder a ofensiva.";
-    else status.textContent = "Faça um registro hoje para começar.";
-
-    // Totais
-    var somas = {};
-    var geral = 0;
-    MATERIAS.forEach(function (m) { somas[m.nome] = 0; });
-    dados.registros.forEach(function (r) {
-      somas[r.materia] = (somas[r.materia] || 0) + r.minutos;
-      geral += r.minutos;
-    });
-    var totais = document.getElementById("totais");
-    totais.innerHTML = "";
-    MATERIAS.forEach(function (m) {
-      var div = document.createElement("div");
-      div.className = "total-item";
-      div.style.setProperty("--cor", m.cor);
-      var nome = document.createElement("div");
-      nome.className = "nome";
-      nome.textContent = m.nome;
-      var valor = document.createElement("div");
-      valor.className = "valor";
-      valor.textContent = formatarTempo(somas[m.nome]);
-      div.appendChild(nome);
-      div.appendChild(valor);
-      totais.appendChild(div);
-    });
-    document.getElementById("totalGeral").textContent = "Total geral: " + formatarTempo(geral);
-
-    // Histórico
-    var hist = document.getElementById("historico");
-    hist.innerHTML = "";
-    if (dados.registros.length === 0) {
-      var vazio = document.createElement("div");
-      vazio.className = "vazio";
-      vazio.textContent = "Nenhum registro ainda. Adicione o primeiro acima!";
-      hist.appendChild(vazio);
-      return;
-    }
-    var lista = dados.registros.slice().sort(function (a, b) {
-      if (a.data !== b.data) return a.data < b.data ? 1 : -1;
-      return b.id - a.id;
-    });
-    lista.forEach(function (r) {
-      var linha = document.createElement("div");
-      linha.className = "registro";
-      linha.style.setProperty("--cor", corDa(r.materia));
-
-      var bola = document.createElement("span");
-      bola.className = "bolinha";
-
-      var mat = document.createElement("span");
-      mat.className = "materia";
-      mat.textContent = r.materia;
-
-      var dt = document.createElement("span");
-      dt.className = "data";
-      dt.textContent = formatarData(r.data);
-
-      var tempo = document.createElement("span");
-      tempo.className = "tempo";
-      tempo.textContent = formatarTempo(r.minutos);
-
-      var bEd = document.createElement("button");
-      bEd.className = "mini";
-      bEd.textContent = "Editar";
-      bEd.onclick = function () { editar(r.id); };
-
-      var bDel = document.createElement("button");
-      bDel.className = "mini";
-      bDel.textContent = "Apagar";
-      bDel.onclick = function () { apagar(r.id); };
-
-      linha.appendChild(bola);
-      linha.appendChild(mat);
-      linha.appendChild(dt);
-      linha.appendChild(tempo);
-      linha.appendChild(bEd);
-      linha.appendChild(bDel);
-
-      if (r.obs) {
-        var o = document.createElement("div");
-        o.className = "obs";
-        o.textContent = r.obs;
-        linha.appendChild(o);
-      }
-      hist.appendChild(linha);
-    });
-  }
-
-  // ====== INÍCIO ======
-  (function iniciar() {
-    var sel = document.getElementById("materia");
-    MATERIAS.forEach(function (m) {
-      var op = document.createElement("option");
-      op.value = m.nome;
-      op.textContent = m.nome;
-      sel.appendChild(op);
-    });
-    document.getElementById("data").value = hoje();
-    desenharHorario();
-    desenhar();
-  })();
+/* ===== INÍCIO ===== */
+(function(){
+  ["materia","pomoMateria"].forEach(function(id){var s=document.getElementById(id);
+    MATERIAS.forEach(function(m){var o=document.createElement("option");o.value=m.nome;o.textContent=m.nome;s.appendChild(o)})});
+  document.getElementById("data").value=hoje();
+  aplicarTema();salvar();desenharHorario();desenhar();pomoDesenhar();
+})();
 </script>
 </body>
 </html>
