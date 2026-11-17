@@ -13,6 +13,10 @@
     --border: #e5e7eb;
     --accent: #4f46e5;
     --fire: #f97316;
+    --laranja: #ee6c2b;
+    --estudo-bg: #dcfce7;
+    --estudo-borda: #22c55e;
+    --hora-bg: #eef0f4;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -23,6 +27,10 @@
       --border: #2c3150;
       --accent: #818cf8;
       --fire: #fb923c;
+      --laranja: #d9581a;
+      --estudo-bg: #14391f;
+      --estudo-borda: #22c55e;
+      --hora-bg: #232845;
     }
   }
   * { box-sizing: border-box; }
@@ -37,6 +45,7 @@
   h1 { margin: 0 0 4px; font-size: 1.7rem; }
   h2 { margin: 0 0 14px; font-size: 1.15rem; }
   .sub { color: var(--muted); margin: 0 0 20px; }
+  .dica { color: var(--muted); font-size: .85rem; margin: 0 0 12px; }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -56,7 +65,7 @@
   /* Formulário */
   .form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
   label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
-  input, select {
+  input, select, textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border);
@@ -64,6 +73,7 @@
     background: var(--bg);
     color: var(--text);
     font-size: 1rem;
+    font-family: inherit;
   }
   .full { grid-column: 1 / -1; }
   button {
@@ -85,6 +95,11 @@
     border: 1px solid var(--border);
   }
   button.mini:hover { color: var(--text); }
+  button.sec {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
 
   /* Totais */
   .totais { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
@@ -114,6 +129,55 @@
   .registro .obs { color: var(--muted); font-size: .9rem; flex-basis: 100%; padding-left: 22px; }
   .registro .tempo { margin-left: auto; font-weight: 600; }
   .vazio { color: var(--muted); text-align: center; padding: 14px 0; }
+
+  /* Tabela de horários */
+  .tabela-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table.horario { border-collapse: collapse; width: 100%; min-width: 820px; }
+  table.horario thead th {
+    background: var(--laranja);
+    color: #fff;
+    padding: 12px 8px;
+    font-size: .9rem;
+    letter-spacing: .03em;
+    text-align: left;
+  }
+  table.horario td {
+    padding: 0;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.horario td:last-child { border-right: none; }
+  table.horario td.col-hora { background: var(--hora-bg); width: 90px; }
+  table.horario td.col-del { width: 44px; text-align: center; vertical-align: middle; }
+  table.horario input.hora {
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    font-weight: 600;
+    padding: 12px 8px;
+  }
+  table.horario textarea {
+    display: block;
+    width: 100%;
+    height: 58px;
+    resize: none;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 8px;
+    font-size: .92rem;
+  }
+  table.horario textarea.estudo {
+    background: var(--estudo-bg);
+    box-shadow: inset 0 0 0 2px var(--estudo-borda);
+  }
+  table.horario input:focus, table.horario textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -133,6 +197,22 @@
     <div class="info recorde">
       Maior ofensiva<br>
       <strong id="melhorStreak">0</strong> dias
+    </div>
+  </div>
+
+  <!-- HORÁRIO SEMANAL -->
+  <div class="card">
+    <h2>🗓️ Meu horário semanal</h2>
+    <p class="dica">Clique em qualquer célula para editar. Tudo é salvo automaticamente. Células com a palavra "estudar" ficam destacadas em verde.</p>
+    <div class="tabela-wrap">
+      <table class="horario">
+        <thead id="horarioCabecalho"></thead>
+        <tbody id="horarioCorpo"></tbody>
+      </table>
+    </div>
+    <div class="acoes">
+      <button onclick="addLinha()">+ Adicionar horário</button>
+      <button class="sec" onclick="restaurarHorario()">Restaurar modelo</button>
     </div>
   </div>
 
@@ -191,15 +271,40 @@
     { nome: "História",   cor: "#f59e0b" },
     { nome: "Geografia",  cor: "#14b8a6" }
   ];
+  var DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
   var CHAVE = "diario_estudos_v1";
+
+  // Modelo inicial do horário (igual ao da imagem; sábado e domingo ficam vazios)
+  function horarioPadrao() {
+    function semana(texto) {
+      var c = [texto, texto, texto, texto, texto, "", ""];
+      return c;
+    }
+    return [
+      { hora: "05:00", celulas: semana("dormir") },
+      { hora: "06:00", celulas: semana("acordar / banho / café") },
+      { hora: "07:00", celulas: semana("transporte") },
+      { hora: "08:00", celulas: semana("trabalho") },
+      { hora: "12:00", celulas: semana("almoço") },
+      { hora: "13:00", celulas: semana("revisão") },
+      { hora: "14:00", celulas: semana("trabalho") },
+      { hora: "18:00", celulas: semana("transporte") },
+      { hora: "19:00", celulas: semana("jantar / banho") },
+      { hora: "20:00", celulas: semana("estudar") },
+      { hora: "23:00", celulas: semana("dormir") }
+    ];
+  }
 
   // ====== DADOS (salvos no navegador) ======
   function carregar() {
     try {
       var d = JSON.parse(localStorage.getItem(CHAVE));
-      if (d && d.registros && d.dias) return d;
+      if (d && d.registros && d.dias) {
+        if (!d.horario || !d.horario.length) d.horario = horarioPadrao();
+        return d;
+      }
     } catch (e) {}
-    return { registros: [], dias: [] };
+    return { registros: [], dias: [], horario: horarioPadrao() };
   }
   function salvar() {
     try { localStorage.setItem(CHAVE, JSON.stringify(dados)); } catch (e) {
@@ -228,7 +333,7 @@
   }
 
   // ====== OFENSIVA ======
-  // Um dia conta quando você adiciona, edita ou apaga algum registro nele.
+  // Um dia conta quando você adiciona, edita ou apaga algum registro de estudo nele.
   function marcarHoje() {
     var h = hoje();
     if (dados.dias.indexOf(h) === -1) dados.dias.push(h);
@@ -277,7 +382,7 @@
     return "#888";
   }
 
-  // ====== AÇÕES ======
+  // ====== AÇÕES DOS REGISTROS ======
   function adicionar() {
     var materia = document.getElementById("materia").value;
     var data = document.getElementById("data").value;
@@ -324,6 +429,94 @@
     marcarHoje();
     salvar();
     desenhar();
+  }
+
+  // ====== HORÁRIO SEMANAL ======
+  function ehEstudo(texto) {
+    return /estud/i.test(texto);
+  }
+
+  function desenharHorario() {
+    // Cabeçalho
+    var cab = document.getElementById("horarioCabecalho");
+    cab.innerHTML = "";
+    var trc = document.createElement("tr");
+    var cabecalhos = ["HORA"].concat(DIAS_SEMANA.map(function (d) { return d.toUpperCase(); })).concat([""]);
+    cabecalhos.forEach(function (t) {
+      var th = document.createElement("th");
+      th.textContent = t;
+      trc.appendChild(th);
+    });
+    cab.appendChild(trc);
+
+    // Corpo
+    var corpo = document.getElementById("horarioCorpo");
+    corpo.innerHTML = "";
+    dados.horario.forEach(function (linha, i) {
+      var tr = document.createElement("tr");
+
+      var tdHora = document.createElement("td");
+      tdHora.className = "col-hora";
+      var inHora = document.createElement("input");
+      inHora.type = "text";
+      inHora.className = "hora";
+      inHora.value = linha.hora;
+      inHora.setAttribute("aria-label", "Horário");
+      inHora.oninput = function () {
+        dados.horario[i].hora = inHora.value;
+        salvar();
+      };
+      tdHora.appendChild(inHora);
+      tr.appendChild(tdHora);
+
+      DIAS_SEMANA.forEach(function (dia, j) {
+        var td = document.createElement("td");
+        var ta = document.createElement("textarea");
+        ta.value = linha.celulas[j] || "";
+        ta.setAttribute("aria-label", dia + " " + linha.hora);
+        if (ehEstudo(ta.value)) ta.classList.add("estudo");
+        ta.oninput = function () {
+          dados.horario[i].celulas[j] = ta.value;
+          ta.classList.toggle("estudo", ehEstudo(ta.value));
+          salvar();
+        };
+        td.appendChild(ta);
+        tr.appendChild(td);
+      });
+
+      var tdDel = document.createElement("td");
+      tdDel.className = "col-del";
+      var bDel = document.createElement("button");
+      bDel.className = "mini";
+      bDel.textContent = "✕";
+      bDel.title = "Remover esta linha";
+      bDel.onclick = function () { removerLinha(i); };
+      tdDel.appendChild(bDel);
+      tr.appendChild(tdDel);
+
+      corpo.appendChild(tr);
+    });
+  }
+
+  function addLinha() {
+    var vazias = DIAS_SEMANA.map(function () { return ""; });
+    dados.horario.push({ hora: "00:00", celulas: vazias });
+    salvar();
+    desenharHorario();
+  }
+
+  function removerLinha(i) {
+    if (!confirm("Remover esta linha do horário?")) return;
+    dados.horario.splice(i, 1);
+    salvar();
+    desenharHorario();
+  }
+
+  function restaurarHorario() {
+    if (!confirm("Isso apaga o seu horário atual e volta ao modelo inicial. Continuar?")) return;
+    dados.horario = horarioPadrao();
+    salvar();
+    desenharHorario();
   }
 
   // ====== TELA ======
@@ -436,6 +629,7 @@
       sel.appendChild(op);
     });
     document.getElementById("data").value = hoje();
+    desenharHorario();
     desenhar();
   })();
 </script>
