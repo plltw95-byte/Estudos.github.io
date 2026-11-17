@@ -71,6 +71,13 @@ table.horario td.col-del{width:44px;text-align:center;vertical-align:middle}
 table.horario input.hora{border:none;border-radius:0;background:transparent;font-weight:600;padding:12px 8px}
 table.horario textarea{display:block;height:58px;resize:none;border:none;border-radius:0;background:transparent;padding:8px;font-size:.92rem}
 table.horario textarea.estudo{background:var(--eb);box-shadow:inset 0 0 0 2px var(--ebo)}
+table.plano{border-collapse:collapse;width:100%;min-width:700px;table-layout:fixed}
+table.plano th{background:var(--laranja);color:#fff;padding:10px 6px;font-size:.85rem;text-align:center}
+table.plano th.hoje{background:var(--accent)}
+table.plano td{padding:0;border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top}
+table.plano td:last-child{border-right:none}
+table.plano td.hoje{background:var(--hj)}
+table.plano textarea{display:block;height:64px;resize:none;border:none;border-radius:0;background:transparent;padding:8px;font-size:.9rem;text-align:center}
 </style>
 </head>
 <body>
@@ -147,6 +154,13 @@ table.horario textarea.estudo{background:var(--eb);box-shadow:inset 0 0 0 2px va
   </div>
 
   <div class="card">
+    <h2>📌 Plano da semana</h2>
+    <p class="dica">Anote nas duas linhas abaixo de cada dia o que você precisa estudar. O dia de hoje fica destacado. Salva automaticamente.</p>
+    <div class="tabela-wrap"><table class="plano"><thead id="planoCabecalho"></thead><tbody id="planoCorpo"></tbody></table></div>
+    <div class="acoes"><button class="sec" onclick="limparPlano()">Limpar plano</button></div>
+  </div>
+
+  <div class="card">
     <h2>Novo registro</h2>
     <div class="form">
       <div><label for="materia">Matéria</label><select id="materia"></select></div>
@@ -184,6 +198,8 @@ var FOCO=25,PAUSA=5,CHAVE="diario_estudos_v1";
 
 function horarioPadrao(){function s(t){return[t,t,t,t,t,"",""]}
 return[{hora:"05:00",celulas:s("dormir")},{hora:"06:00",celulas:s("acordar / banho / café")},{hora:"07:00",celulas:s("transporte")},{hora:"08:00",celulas:s("trabalho")},{hora:"12:00",celulas:s("almoço")},{hora:"13:00",celulas:s("revisão")},{hora:"14:00",celulas:s("trabalho")},{hora:"18:00",celulas:s("transporte")},{hora:"19:00",celulas:s("jantar / banho")},{hora:"20:00",celulas:s("estudar")},{hora:"23:00",celulas:s("dormir")}]}
+function planoVazio(){return[["","","","","","",""],["","","","","","",""]]}
+function planoValido(p){return Array.isArray(p)&&p.length===2&&Array.isArray(p[0])&&Array.isArray(p[1])&&p[0].length===7&&p[1].length===7}
 
 /* ===== DADOS ===== */
 function carregar(){
@@ -193,8 +209,9 @@ function carregar(){
       if(!d.prova)d.prova=daquiUmAno();
       if(!d.inicio)d.inicio=hoje();
       if(!d.meta)d.meta=120;
+      if(!planoValido(d.plano))d.plano=planoVazio();
       return d;}}catch(e){}
-  return{registros:[],dias:[],horario:horarioPadrao(),inicio:hoje(),prova:daquiUmAno(),meta:120,tema:null};
+  return{registros:[],dias:[],horario:horarioPadrao(),inicio:hoje(),prova:daquiUmAno(),meta:120,tema:null,plano:planoVazio()};
 }
 function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(dados))}catch(e){alert("Não consegui salvar. Verifique se o navegador permite armazenamento.")}}
 var dados=carregar();
@@ -386,7 +403,8 @@ function importar(inp){
       dados=d;
       if(!dados.horario||!dados.horario.length)dados.horario=horarioPadrao();
       if(!dados.prova)dados.prova=daquiUmAno();if(!dados.inicio)dados.inicio=hoje();if(!dados.meta)dados.meta=120;
-      salvar();aplicarTema();desenharHorario();desenhar();alert("Backup restaurado com sucesso!");
+      if(!planoValido(dados.plano))dados.plano=planoVazio();
+      salvar();aplicarTema();desenharHorario();desenharPlano();desenhar();alert("Backup restaurado com sucesso!");
     }catch(e){alert("Esse arquivo não parece ser um backup válido.")}
     inp.value="";
   };
@@ -418,6 +436,32 @@ function desenharHorario(){
 function addLinha(){dados.horario.push({hora:"00:00",celulas:DIAS_SEMANA.map(function(){return""})});salvar();desenharHorario()}
 function removerLinha(i){if(!confirm("Remover esta linha do horário?"))return;dados.horario.splice(i,1);salvar();desenharHorario()}
 function restaurarHorario(){if(!confirm("Isso apaga o seu horário atual e volta ao modelo inicial. Continuar?"))return;dados.horario=horarioPadrao();salvar();desenharHorario()}
+
+/* ===== PLANO DA SEMANA ===== */
+function desenharPlano(){
+  var idxHoje=(new Date().getDay()+6)%7;
+  var cab=document.getElementById("planoCabecalho");cab.innerHTML="";
+  var tr=document.createElement("tr");
+  DIAS_SEMANA.forEach(function(d,j){var th=mk("th",j===idxHoje?"hoje":"",d.toUpperCase());tr.appendChild(th)});
+  cab.appendChild(tr);
+  var corpo=document.getElementById("planoCorpo");corpo.innerHTML="";
+  for(var i=0;i<2;i++){
+    (function(i){
+      var r=document.createElement("tr");
+      DIAS_SEMANA.forEach(function(dia,j){
+        var td=document.createElement("td");if(j===idxHoje)td.className="hoje";
+        var ta=document.createElement("textarea");
+        ta.value=dados.plano[i][j]||"";
+        ta.placeholder=i===0?"Matéria 1":"Matéria 2";
+        ta.setAttribute("aria-label",dia+" - linha "+(i+1));
+        ta.oninput=function(){dados.plano[i][j]=ta.value;salvar()};
+        td.appendChild(ta);r.appendChild(td);
+      });
+      corpo.appendChild(r);
+    })(i);
+  }
+}
+function limparPlano(){if(!confirm("Apagar tudo o que está escrito no plano da semana?"))return;dados.plano=planoVazio();salvar();desenharPlano()}
 
 /* ===== TELA ===== */
 function desenhar(){
@@ -463,7 +507,7 @@ function desenhar(){
   ["materia","pomoMateria"].forEach(function(id){var s=document.getElementById(id);
     MATERIAS.forEach(function(m){var o=document.createElement("option");o.value=m.nome;o.textContent=m.nome;s.appendChild(o)})});
   document.getElementById("data").value=hoje();
-  aplicarTema();salvar();desenharHorario();desenhar();pomoDesenhar();
+  aplicarTema();salvar();desenharHorario();desenharPlano();desenhar();pomoDesenhar();
 })();
 </script>
 </body>
